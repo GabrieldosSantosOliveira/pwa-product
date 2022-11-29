@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiContext = (token?: string) => {
   return axios.create({
-    baseURL: 'http://localhost:3333',
+    baseURL: process.env.REACT_APP_API_URL,
     headers: {
       Authorization: `Bearer ${token}`
     }
