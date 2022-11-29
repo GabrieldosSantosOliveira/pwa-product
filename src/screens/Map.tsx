@@ -7,7 +7,7 @@ export const Map = () => {
       navigator.geolocation.getCurrentPosition(
         position => {
           setPosition(
-            `http://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}&z=16&output=embed`
+            `https://maps.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}&z=16&output=embed`
           );
         },
         error => {
@@ -26,7 +26,7 @@ export const Map = () => {
               break;
           }
           setPosition(
-            `http://maps.google.com/maps?q=-22.2520202,-53.3372321&z=16&output=embed`
+            `https://maps.google.com/maps?q=-22.2520202,-53.3372321&z=16&output=embed`
           );
         }
       );
