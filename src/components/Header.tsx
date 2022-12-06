@@ -34,6 +34,7 @@ export const Header = ({ menu }: IHeaderProps) => {
         gap={5}
       >
         <Link to="/products">Produtos</Link>
+        <Link to="/create-products">Criar produto</Link>
         <Link to="/map">Mapa</Link>
       </HStack>
     </HStack>
