@@ -8,12 +8,15 @@ import {
   Input,
   FormErrorMessage,
   InputGroup,
-  InputLeftElement
+  InputLeftElement,
+  useToast
 } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Money, Image as ImageIcon } from 'phosphor-react';
 import { useForm } from 'react-hook-form';
 
+import { apiContext } from '../services/apiAuth';
+import { getStorage } from '../services/getStorage';
 import { schema } from '../validation/update';
 import { IProduct } from './Product';
 type IModalProduct = Partial<IProduct>;
@@ -25,8 +28,10 @@ export const ModalUpdate = ({
   description,
   image,
   title,
-  priceForCents
+  priceForCents,
+  id
 }: IModalProduct) => {
+  const toast = useToast();
   const {
     formState: { errors },
     handleSubmit,
@@ -34,6 +39,26 @@ export const ModalUpdate = ({
   } = useForm<IForm>({
     resolver: yupResolver(schema)
   });
+  const handleUpdateProduct = async (data: IForm) => {
+    try {
+      const api = apiContext(getStorage('token'));
+      await api.put(`/products/${id}`, data);
+      toast({
+        title: 'Atualização realizada com sucesso',
+        status: 'success',
+        duration: 3000,
+        isClosable: true
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: 'Falha a atualização!',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      });
+    }
+  };
   return (
     <>
       <ModalHeader fontFamily="Roboto" fontWeight={700}>
@@ -41,7 +66,7 @@ export const ModalUpdate = ({
       </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
-        <form onSubmit={handleSubmit(alert)}>
+        <form onSubmit={handleSubmit(handleUpdateProduct)}>
           <FormControl
             isInvalid={!!errors?.description}
             my={6}
