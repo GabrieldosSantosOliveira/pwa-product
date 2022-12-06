@@ -10,9 +10,11 @@ import {
   Wrap,
   WrapItem,
   useMediaQuery,
-  Modal
+  Modal,
+  Text
 } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Loading } from '../components/Loading';
 import { ModalProject } from '../components/ModalProduct';
@@ -26,6 +28,7 @@ type IHome = IProduct;
 
 export function Products() {
   const token = getStorage('token');
+  const navigate = useNavigate();
   const [page, setPage] = useState(true);
   const [products, setProducts] = useState<
     IHome[] | undefined
@@ -60,17 +63,21 @@ export function Products() {
 
   useEffect(() => {
     async function fetchProducts() {
-      const api = apiContext(token);
-      const response = await api.get<IProduct[]>(
-        '/products'
-      );
-      setProducts(response.data);
+      try {
+        const api = apiContext(token);
+        const response = await api.get<IProduct[]>(
+          '/products'
+        );
+        setProducts(response.data);
+      } catch (error) {
+        console.log(error);
+        navigate('/offline');
+      }
     }
     fetchProducts();
   }, [token]);
   if (!products) return <Loading />;
-  if (products.length === 0)
-    return <div>Nenhum produto encontrado</div>;
+
   return (
     <>
       <Grid
@@ -94,14 +101,20 @@ export function Products() {
           justify={isMobile ? 'center' : 'space-between'}
           minH="100vh"
         >
-          {products.map(product => (
-            <WrapItem key={product.id}>
-              <Product
-                {...product}
-                onHandleClick={onHandleClick}
-              />
+          {products.length > 0 ? (
+            products.map(product => (
+              <WrapItem key={product.id}>
+                <Product
+                  {...product}
+                  onHandleClick={onHandleClick}
+                />
+              </WrapItem>
+            ))
+          ) : (
+            <WrapItem>
+              <Text>Nenhum produto encontrado</Text>
             </WrapItem>
-          ))}
+          )}
         </Wrap>
         <GridItem bg="gray.800" area="footer">
           <Footer />
@@ -118,7 +131,9 @@ export function Products() {
           <ModalFooter>
             <HStack gap={4}>
               <Button onClick={() => onHandleEdit()}>
-                Atualizar Dispositivo
+                {page
+                  ? 'Atualizar Dispositivo'
+                  : 'Visualizar Dispositivo'}
               </Button>
               <Button
                 onClick={() =>
