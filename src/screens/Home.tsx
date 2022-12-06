@@ -14,6 +14,7 @@ import {
   WrapItem
 } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Loading } from '../components/Loading';
 import { Footer } from './../components/Footer';
@@ -23,11 +24,13 @@ import { api } from './../services/api';
 import { Register } from './Register';
 import { SingIn } from './SingIn';
 type IHome = IProduct;
-
+type NoProducts = {
+  message: string;
+};
 export function Home() {
-  const [products, setProducts] = useState<IHome[] | null>(
-    null
-  );
+  const navigate = useNavigate();
+  const [products, setProducts] = useState<IHome[]>();
+  const [isLoading, setIsLoading] = useState(true);
   const [isMobile] = useMediaQuery('(max-width: 700px)');
 
   const { isOpen, onClose, onOpen } = useDisclosure();
@@ -39,16 +42,23 @@ export function Home() {
 
   useEffect(() => {
     async function fetchProducts() {
-      const response = await api.get<IProduct[]>(
-        '/products'
-      );
-      setProducts(response.data);
+      try {
+        const response = await api.get<IProduct[]>(
+          '/products'
+        );
+        setProducts(response.data);
+      } catch (error) {
+        console.log(error);
+        navigate('/offline');
+      } finally {
+        setIsLoading(false);
+      }
     }
     fetchProducts();
   }, []);
-  if (!products) return <Loading />;
-  if (products.length === 0)
-    return <div>Nenhum produto encontrado</div>;
+
+  if (isLoading || !products) return <Loading />;
+
   return (
     <>
       <Grid
@@ -71,14 +81,18 @@ export function Home() {
             justify={isMobile ? 'center' : 'space-between'}
             minH="100vh"
           >
-            {products.map(product => (
-              <WrapItem key={product.id}>
-                <Product
-                  {...product}
-                  onHandleClick={onHandleClick}
-                />
-              </WrapItem>
-            ))}
+            {products.length !== 0 ? (
+              products.map(product => (
+                <WrapItem key={product.id}>
+                  <Product
+                    {...product}
+                    onHandleClick={onHandleClick}
+                  />
+                </WrapItem>
+              ))
+            ) : (
+              <Text>Sem produtos para listar</Text>
+            )}
           </Wrap>
         </GridItem>
         <GridItem bg="gray.800" area="footer">
