@@ -1,6 +1,8 @@
 import { Center } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 export const Map = () => {
+  const navigate = useNavigate();
   const [position, setPosition] = useState('');
   const getLocation = () => {
     if (navigator.geolocation) {
@@ -33,7 +35,12 @@ export const Map = () => {
     }
   };
   useEffect(() => {
-    getLocation();
+    try {
+      getLocation();
+    } catch (error) {
+      console.log(error);
+      navigate('/offline');
+    }
   }, []);
 
   return (
